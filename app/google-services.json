@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "591983729579",
+    "project_id": "interview-854d0",
+    "storage_bucket": "interview-854d0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591983729579:android:5a6d7871e7aa03585910ee",
+        "android_client_info": {
+          "package_name": "top.umair.tecjaunttask"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591983729579-gda7mh31rah8iviv50574l50kjpumajc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "top.umair.tecjaunttask",
+            "certificate_hash": "3ed88f33cbcebff1813d5c7cbcdb5a7bb3f921da"
+          }
+        },
+        {
+          "client_id": "591983729579-v6lhqbmd7djv2cc4ac64qoj63oulih2d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATMlLPjvSxBSFNKSR6SKo1lDT2FUQI9lY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591983729579-v6lhqbmd7djv2cc4ac64qoj63oulih2d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
