@@ -161,9 +161,10 @@ fun PickProfileImage(
 @Composable
 fun CircularProgressBar(isDisplayed: Boolean) {
     if (isDisplayed) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircularProgressIndicator()
         }

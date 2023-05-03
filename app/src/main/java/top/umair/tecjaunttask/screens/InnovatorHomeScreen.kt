@@ -1,43 +1,76 @@
 package top.umair.tecjaunttask.screens
 
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import top.umair.tecjaunttask.viewModel.InnovatorViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.ConstraintSet
-import androidx.constraintlayout.compose.layoutId
-import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
-import top.umair.tecjaunttask.data.local.InnovatorDao
-import top.umair.tecjaunttask.viewModel.InnovatorViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import top.umair.tecjaunttask.models.InnovatorEntity
 
 
 @Composable
-fun InnovatorHomeScreen(){
-    Text(text = "Home Screen")
+fun InnovatorHomeScreen(viewModel: InnovatorViewModel = hiltViewModel()) {
+    val innovatorList by viewModel.innovatorListState.collectAsState()
+
+
+    Column {
+        // Show loading indicator if data is being loaded
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Button(onClick = {
+                    viewModel.backupData()
+                }) {
+                    Text(text = "Backup")
+                }
+                Button(onClick = { viewModel.restoreData() }) {
+                    Text(text = "Restore Backup")
+                }
+
+            }
+        InnovatorList(innovators = innovatorList)
+    }
+
 
 }
+@Composable
+fun InnovatorList(innovators: List<InnovatorEntity>) {
+    LazyColumn {
+        items(innovators) { innovator ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = innovator.firstName ?: "",
+                        style = MaterialTheme.typography.h6,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = innovator.lastName ?: "",
+                        style = MaterialTheme.typography.subtitle1,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 
 
