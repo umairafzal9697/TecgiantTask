@@ -6,18 +6,16 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import top.umair.tecjaunttask.data.local.InnovatorDao
 import top.umair.tecjaunttask.models.InnovatorEntity
 import top.umair.tecjaunttask.utils.AppConstants
-import java.io.IOException
 import javax.inject.Inject
 
 class InnovatorRepository @Inject constructor(
@@ -29,13 +27,11 @@ class InnovatorRepository @Inject constructor(
 
 
     suspend fun addInnovator(pojo: InnovatorEntity, ref: String, function: (Boolean) -> Unit) {
-        val documentReference =
-            FirebaseFirestore.getInstance().collection(ref).document()
-        val localId = documentReference.id
-        pojo.documentId = localId
+        pojo.documentId =pojo.uuid
+        val documentReference = FirebaseFirestore.getInstance().collection(ref).document(pojo.documentId)
 
         if (isNetworkAvailable()) {
-            documentReference.set(pojo)
+            documentReference.set(pojo, SetOptions.merge())
                 .addOnSuccessListener {
                     function(true)
                     Log.d("TAG", "addData: Success")
@@ -43,11 +39,13 @@ class InnovatorRepository @Inject constructor(
                 .addOnFailureListener {
                     function(false)
                     Log.e("TAG", "addData: Error", it)
+
                 }
             innovatorDao.insert(pojo)
+
         } else {
             innovatorDao.insert(pojo)
-            function(false)
+            function(true)
         }
     }
 
@@ -68,14 +66,14 @@ class InnovatorRepository @Inject constructor(
                     // Then, fetch data from Firestore and store it in Room
                     val result = firestore.collection(AppConstants.innovators).get().await()
                     Log.d("TAG", "getAll: $result ")
-                    val schools = mutableListOf<InnovatorEntity>()
+                    val innovator = mutableListOf<InnovatorEntity>()
                     for (document in result.documents) {
-                        document.toObject<InnovatorEntity>()?.let { schools.add(it) }
+                        document.toObject<InnovatorEntity>()?.let { innovator.add(it) }
                     }
-                    // Save the fetched data in Room
-                    innovatorDao.replaceAll(schools)
+
                     // Emit the fetched data
-                    emit(schools)
+                    emit(innovator)
+//                    emit(localData)
                 } catch (e: Exception) {
                     // If fetching data from Firestore fails, emit the local data
                     emit(localData)
@@ -90,53 +88,48 @@ class InnovatorRepository @Inject constructor(
         }
     }
 
-    suspend fun backupData() {
+    suspend fun backupData(acknowledge: (Boolean) -> Unit) {
         // Check network availability
         val isNetworkAvailable = isNetworkAvailable()
 
         if (isNetworkAvailable) {
             // Fetch all data from Room and upload to Firestore
             val localData = innovatorDao.getAll()
-            val dataMap = localData.associateBy({ it.documentId }, { it.documentId })
-            firestore.collection(AppConstants.innovators).document("data")
-                .set(dataMap)
-                .addOnSuccessListener {
-                    // Backup successful
+
+//            val dataMap = localData.associateBy({ it.documentId }, { it.documentId })
+
+            localData.forEach{ innovatorEntity ->
+                addInnovator(innovatorEntity,AppConstants.innovators){
+                    acknowledge(it)
                 }
-                .addOnFailureListener { exception ->
-                    throw exception
-                }
+            }
+
 
         } else {
-            throw IOException("Network unavailable")
+            acknowledge(false)
+
+//            throw IOException("Network unavailable")
         }
     }
 
-    suspend fun restoreData() {
+    suspend fun restoreData(acknowledge: (Boolean) -> Unit) {
         // Check network availability
         val isNetworkAvailable = isNetworkAvailable()
 
         if (isNetworkAvailable) {
             // Download data from Firestore and replace all data in Room
-            val remoteData = firestore.collection(AppConstants.innovators).document("data")
-                .get()
-                .addOnSuccessListener { document ->
-                    val schools = document.toObject<List<InnovatorEntity>>()
-                    schools?.let {
-                        runBlocking {
-                            innovatorDao.replaceAll(it)
-                        }
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    throw exception
-                }
 
-            // Wait for the remote data to finish downloading
-            remoteData.await()
-        } else {
+            getAll().collect {
+                // Save the fetched data in Room
+                    innovatorDao.replaceAll(it)
 
-            throw IOException("Network unavailable")
+                Log.d("meraData", ": $it")
+            }
+
+    } else {
+            acknowledge(false)
+
+//            throw IOException("Network unavailable")
 
         }
     }

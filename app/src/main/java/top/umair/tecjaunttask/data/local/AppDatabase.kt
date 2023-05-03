@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import top.umair.tecjaunttask.models.InnovatorEntity
 
-@Database(entities = [InnovatorEntity::class], version = 1)
+@Database(entities = [InnovatorEntity::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun innovatorDao(): InnovatorDao

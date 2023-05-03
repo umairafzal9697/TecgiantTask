@@ -51,15 +51,20 @@ class InnovatorViewModel @Inject constructor(
 
 
 
-    fun backupData() {
+    fun backupData(acknowledge: (Boolean) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.backupData()
+            repository.backupData(){
+                acknowledge(it)
+            }
         }
     }
 
-    fun restoreData() {
+    fun restoreData(acknowledge: (Boolean) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.restoreData()
+            repository.restoreData(){
+                acknowledge(it)
+            }
+
         }
     }
 
